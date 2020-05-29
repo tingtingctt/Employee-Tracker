@@ -92,8 +92,44 @@ function addDepartment() {
     });
 }
 
+function addRole() {
+  inquirer
+    .prompt([{
+      name: "role",
+      type: "input",
+      message: "What role would you like to add?"
+    },
+    {
+      name: "salary",
+      type: "input",
+      message: "What's the salary of this role?"
+    },
+    {
+      name: "department_id",
+      type: "input",
+      message: "What's the department id of this role?"
+    },
+  ])
+    .then(function(answer) {
+      var query = "INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)";
+      connection.query(query, [answer.role, answer.salary, answer.department_id], function(err) {
+        if (err) throw err;
+        viewRoles();
+      });
+    });
+}
+
 async function viewDepartments() {
   var query = "SELECT * FROM department";
+  var data = await connection.query(query,function(err, res) {
+      if (err) throw err;
+      console.table(res)
+    });
+    init();
+}
+
+async function viewRoles() {
+  var query = "SELECT * FROM role";
   var data = await connection.query(query,function(err, res) {
       if (err) throw err;
       console.table(res)
