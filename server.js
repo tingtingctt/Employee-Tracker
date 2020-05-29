@@ -94,13 +94,11 @@ function addDepartment() {
 
 async function addRole() {
   var depts = [];
-  // var results = [];
   var query = "SELECT * FROM department";
   var data = await connection.query(query,function(err, res) {
       if (err) throw err;
       res.forEach (function(dept){
         depts.push(dept.name);
-        // results.push(dept);
       });
     });
 
@@ -124,7 +122,6 @@ async function addRole() {
   ])
     .then(function(answer) {
       var dept_id = depts.indexOf(answer.department) + 1;
-      // console.log(results[dept_id].id);
       var query = "INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)";
       connection.query(query, [answer.role, answer.salary, dept_id], function(err) {
         if (err) throw err;
@@ -213,22 +210,44 @@ async function viewEmployees() {
     init();
 }
 
-function updateRole() {
+async function updateRole() {
+  var employees = [];
+  var roles = [];
+  
+  var dataEmployees = await connection.query("SELECT * FROM employee",function(err, res) {
+      if (err) throw err;
+      res.forEach (function(employee){
+        employees.push(employee.first_name + " " + employee.last_name);
+      });
+    });
+
+  var dataRoles = await connection.query("SELECT * FROM role LEFT JOIN department ON role.department_id = department.id", function(err, res) {
+      if (err) throw err;
+      res.forEach (function(role){
+        roles.push(role.name + " " + role.title);
+      });
+    });
+
   inquirer
-    .prompt([{
-      name: "id",
-      type: "input",
-      message: "What's the employee's id?"
-    },
-    {
-      name: "role",
-      type: "input",
-      message: "What's the role id would you like to change into?"
-    }
-  ])
+    .prompt([
+      {
+        name: "employee",
+        type: "rawlist",
+        message: "Who is employee to be updated?",
+        choices: employees
+      },
+      {
+        name: "role",
+        type: "rawlist",
+        message: "What is the new role of this employee?",
+        choices: roles
+      }
+    ])
     .then(function(answer) {
+      var role_id = roles.indexOf(answer.role) + 1;
+      var employee_id = employees.indexOf(answer.employee) + 1;
       var query = "UPDATE employee SET role_id = ? WHERE id = ?";
-      connection.query(query, [answer.role, answer.id], function(err) {
+      connection.query(query, [role_id, employee_id], function(err) {
         if (err) throw err;
         viewEmployees();
       });
