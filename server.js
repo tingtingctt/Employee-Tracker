@@ -119,6 +119,38 @@ function addRole() {
     });
 }
 
+function addEmployee() {
+  inquirer
+    .prompt([{
+      name: "first_name",
+      type: "input",
+      message: "What's the first name of the employee?"
+    },
+    {
+      name: "last_name",
+      type: "input",
+      message: "What's the last name of the employee?"
+    },
+    {
+      name: "role_id",
+      type: "input",
+      message: "What's the role id of the employee?"
+    },
+    {
+      name: "manager_id",
+      type: "input",
+      message: "What's the manager id of the employee?"
+    }
+  ])
+    .then(function(answer) {
+      var query = "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)";
+      connection.query(query, [answer.first_name, answer.last_name, answer.role_id, answer.manager_id], function(err) {
+        if (err) throw err;
+        viewEmployees();
+      });
+    });
+}
+
 async function viewDepartments() {
   var query = "SELECT * FROM department";
   var data = await connection.query(query,function(err, res) {
@@ -135,6 +167,37 @@ async function viewRoles() {
       console.table(res)
     });
     init();
+}
+
+async function viewEmployees() {
+  var query = "SELECT * FROM employee";
+  var data = await connection.query(query,function(err, res) {
+      if (err) throw err;
+      console.table(res)
+    });
+    init();
+}
+
+function updateRole() {
+  inquirer
+    .prompt([{
+      name: "id",
+      type: "input",
+      message: "What's the employee's id?"
+    },
+    {
+      name: "role",
+      type: "input",
+      message: "What's the role id would you like to change into?"
+    }
+  ])
+    .then(function(answer) {
+      var query = "UPDATE employee SET role_id = ? WHERE id = ?";
+      connection.query(query, [answer.role, answer.id], function(err) {
+        if (err) throw err;
+        viewEmployees();
+      });
+    });
 }
 
 // async function viewDepartments() {
