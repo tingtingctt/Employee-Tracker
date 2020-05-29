@@ -92,7 +92,18 @@ function addDepartment() {
     });
 }
 
-function addRole() {
+async function addRole() {
+  var depts = [];
+  // var results = [];
+  var query = "SELECT * FROM department";
+  var data = await connection.query(query,function(err, res) {
+      if (err) throw err;
+      res.forEach (function(dept){
+        depts.push(dept.name);
+        results.push(dept);
+      });
+    });
+
   inquirer
     .prompt([{
       name: "role",
@@ -105,14 +116,17 @@ function addRole() {
       message: "What's the salary of this role?"
     },
     {
-      name: "department_id",
-      type: "input",
-      message: "What's the department id of this role?"
+      name: "department",
+      type: "rawlist",
+      message: "Which department does this role belong to?",
+      choices: depts
     },
   ])
     .then(function(answer) {
+      var dept_id = depts.indexOf(answer.department) + 1;
+      // console.log(results[dept_id].id);
       var query = "INSERT INTO role (title, salary, department_id) VALUES (?, ?, ?)";
-      connection.query(query, [answer.role, answer.salary, answer.department_id], function(err) {
+      connection.query(query, [answer.role, answer.salary, dept_id], function(err) {
         if (err) throw err;
         viewRoles();
       });
@@ -199,6 +213,18 @@ function updateRole() {
       });
     });
 }
+
+// async function getDepartments() {
+//   var query = "SELECT * FROM department";
+//   depts = [];
+//   var data = await connection.query(query,function(err, res) {
+//       if (err) throw err;
+//       res.forEach (function(dept){
+//         depts.push(dept.name)
+//       }) 
+//       return depts
+//     });
+// }
 
 // async function viewDepartments() {
 //   var query = "SELECT * FROM department";
