@@ -161,7 +161,7 @@ async function viewDepartments() {
 }
 
 async function viewRoles() {
-  var query = "SELECT * FROM role";
+  var query = "SELECT * FROM department RIGHT JOIN role ON role.department_id = department.id";
   var data = await connection.query(query,function(err, res) {
       if (err) throw err;
       console.table(res)
@@ -170,7 +170,7 @@ async function viewRoles() {
 }
 
 async function viewEmployees() {
-  var query = "SELECT * FROM employee";
+  var query = "SELECT * FROM employee LEFT JOIN role ON employee.role_id = role.id";
   var data = await connection.query(query,function(err, res) {
       if (err) throw err;
       console.table(res)
