@@ -100,7 +100,7 @@ async function addRole() {
       if (err) throw err;
       res.forEach (function(dept){
         depts.push(dept.name);
-        results.push(dept);
+        // results.push(dept);
       });
     });
 
@@ -133,7 +133,24 @@ async function addRole() {
     });
 }
 
-function addEmployee() {
+async function addEmployee() {
+  var roles = [];
+  var query = "SELECT * FROM role LEFT JOIN department ON role.department_id = department.id";
+  var dataRoles = await connection.query(query,function(err, res) {
+      if (err) throw err;
+      res.forEach (function(role){
+        roles.push(role.name + " " + role.title);
+      });
+    });
+
+  var employees = ["none"];
+  var dataEmployees = await connection.query("SELECT * FROM employee",function(err, res) {
+      if (err) throw err;
+      res.forEach (function(employee){
+        employees.push(employee.first_name + " " + employee.last_name);
+      });
+    });
+
   inquirer
     .prompt([{
       name: "first_name",
@@ -146,19 +163,23 @@ function addEmployee() {
       message: "What's the last name of the employee?"
     },
     {
-      name: "role_id",
-      type: "input",
-      message: "What's the role id of the employee?"
+      name: "role",
+      type: "rawlist",
+      message: "What is the role of this employee?",
+      choices: roles
     },
     {
-      name: "manager_id",
-      type: "input",
-      message: "What's the manager id of the employee?"
+      name: "manager",
+      type: "rawlist",
+      message: "Who is the manager of this employee?",
+      choices: employees
     }
   ])
     .then(function(answer) {
+      var role_id = roles.indexOf(answer.role) + 1;
+      var manager_id = employees.indexOf(answer.manager);
       var query = "INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?, ?, ?, ?)";
-      connection.query(query, [answer.first_name, answer.last_name, answer.role_id, answer.manager_id], function(err) {
+      connection.query(query, [answer.first_name, answer.last_name, role_id, manager_id], function(err) {
         if (err) throw err;
         viewEmployees();
       });
