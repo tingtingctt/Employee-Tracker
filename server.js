@@ -16,12 +16,23 @@ connection.connect(function(err) {
   init();
 });
 
-function init() {
-  // var query = "SELECT e.first_name e.last_name r.title r.name r.salary FROM employee e INNER JOIN role r ON e.role_id = r.id INNER JOIN deparment d ON (r.department_id = d.id)";
-  // connection.query(query,function(err, res) {
-  //   if (err) throw err;
-  //   console.table(res)
-  // });
+var allEmployees = [];
+var allRoles = [];
+
+async function init() {
+  var dataEmployees = await connection.query("SELECT * FROM employee",function(err, res) {
+      if (err) throw err;
+      res.forEach (function(employee){
+        allEmployees.push(employee.first_name + " " + employee.last_name);
+      });
+    });
+
+  var dataRoles = await connection.query("SELECT * FROM role LEFT JOIN department ON role.department_id = department.id", function(err, res) {
+      if (err) throw err;
+      res.forEach (function(role){
+        allRoles.push(role.dept + " " + role.title);
+      });
+    });
   
   inquirer
     .prompt({
@@ -84,7 +95,7 @@ function addDepartment() {
       message: "What department would you like to add?"
     })
     .then(function(answer) {
-      var query = "INSERT INTO department (name) VALUES (?)";
+      var query = "INSERT INTO department (dept) VALUES (?)";
       connection.query(query, [answer.department], function(err) {
         if (err) throw err;
         viewDepartments();
@@ -98,7 +109,7 @@ async function addRole() {
   var data = await connection.query(query,function(err, res) {
       if (err) throw err;
       res.forEach (function(dept){
-        depts.push(dept.name);
+        depts.push(dept.dept);
       });
     });
 
@@ -140,7 +151,7 @@ async function addEmployee() {
       });
     });
 
-  var employees = ["none"];
+  var employees = ["null"];
   var dataEmployees = await connection.query("SELECT * FROM employee",function(err, res) {
       if (err) throw err;
       res.forEach (function(employee){
@@ -187,91 +198,56 @@ async function viewDepartments() {
   var query = "SELECT * FROM department";
   var data = await connection.query(query,function(err, res) {
       if (err) throw err;
+      console.log("\n");
       console.table(res)
     });
     init();
 }
 
 async function viewRoles() {
-  var query = "SELECT * FROM department RIGHT JOIN role ON role.department_id = department.id";
+  var query = "SELECT role.title, department.dept FROM department RIGHT JOIN role ON role.department_id = department.id";
   var data = await connection.query(query,function(err, res) {
       if (err) throw err;
+      console.log("\n");
       console.table(res)
     });
     init();
 }
 
 async function viewEmployees() {
-  var query = "SELECT * FROM employee LEFT JOIN role ON employee.role_id = role.id";
+  var query = "SELECT employee.id, employee.first_name, employee.last_name, department.dept, role.title, employee.manager_id FROM employee LEFT JOIN role ON employee.role_id = role.id INNER JOIN department ON role.department_id = department.id";
   var data = await connection.query(query,function(err, res) {
       if (err) throw err;
+      console.log("\n");
       console.table(res)
     });
     init();
 }
 
 async function updateRole() {
-  var employees = [];
-  var roles = [];
-  
-  var dataEmployees = await connection.query("SELECT * FROM employee",function(err, res) {
-      if (err) throw err;
-      res.forEach (function(employee){
-        employees.push(employee.first_name + " " + employee.last_name);
-      });
-    });
-
-  var dataRoles = await connection.query("SELECT * FROM role LEFT JOIN department ON role.department_id = department.id", function(err, res) {
-      if (err) throw err;
-      res.forEach (function(role){
-        roles.push(role.name + " " + role.title);
-      });
-    });
-
   inquirer
-    .prompt([
-      {
-        name: "employee",
-        type: "rawlist",
-        message: "Who is employee to be updated?",
-        choices: employees
-      },
-      {
-        name: "role",
-        type: "rawlist",
-        message: "What is the new role of this employee?",
-        choices: roles
-      }
-    ])
-    .then(function(answer) {
-      var role_id = roles.indexOf(answer.role) + 1;
-      var employee_id = employees.indexOf(answer.employee) + 1;
-      var query = "UPDATE employee SET role_id = ? WHERE id = ?";
-      connection.query(query, [role_id, employee_id], function(err) {
-        if (err) throw err;
-        viewEmployees();
+      .prompt([
+        {
+          name: "employee",
+          type: "rawlist",
+          message: "Who is the employee to be updated?",
+          choices: allEmployees
+        },
+        {
+          name: "role",
+          type: "rawlist",
+          message: "What is the new role of this employee?",
+          choices: allRoles
+        }
+      ])
+      .then(function(answer) {
+        var role_id = allRoles.indexOf(answer.role) + 1;
+        var employee_id = allEmployees.indexOf(answer.employee) + 1;
+        var query = "UPDATE employee SET role_id = ? WHERE id = ?";
+        connection.query(query, [role_id, employee_id], function(err) {
+          if (err) throw err;
+          viewEmployees();
+        });
       });
-    });
-}
+  }
 
-// async function getDepartments() {
-//   var query = "SELECT * FROM department";
-//   depts = [];
-//   var data = await connection.query(query,function(err, res) {
-//       if (err) throw err;
-//       res.forEach (function(dept){
-//         depts.push(dept.name)
-//       }) 
-//       return depts
-//     });
-// }
-
-// async function viewDepartments() {
-//   var query = "SELECT * FROM department";
-//   var data = await connection.query(query,function(err, res) {
-//       if (err) throw err;
-//       return res
-//     });
-//     console.table(data);
-//     init();
-// }
