@@ -9,7 +9,7 @@ VALUES ("Manager", 200000, 1), ("Assistant", 80000, 1), ("Intern", 40000, 1),
 ("Manager", 100000, 4), ("Assistant", 50000, 4), ("Intern", 30000, 4);
 
 INSERT INTO employee (first_name, last_name, role_id, manager_id)
-VALUES ("Bryan", "Swarthout", 4, null), ("Wilson", "Lam", 6, null), 
+VALUES ("Bryan", "Swarthout", 4, null), ("Wilson", "Lam", 6, 1), 
 ("Leo", "DiCaprio", 1, null), ("Tina", "Fay", 8, null), ("Ellen", "Degenerous", 11, null);
 
 SELECT * FROM department;
