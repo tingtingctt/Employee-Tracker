@@ -2,6 +2,8 @@
 
 ## Functionality Video
 
+https://drive.google.com/file/d/1TG6Gu4BA7vlKZwDvhvZNEU6Yv48hrs1c/view
+
 
 ## Description
 
@@ -15,7 +17,6 @@ The command-line application allows the user to:
 
   * Update employee roles
 
-The database is pre-populated with `seeds.sql` and `schema.sql` files to demonstrate the app's functionality.
 
 
 ## Installation
@@ -26,3 +27,9 @@ To install dependencies, run command:
 npm i
 ```
 
+
+## mySQL Database
+
+The database is pre-populated with `seeds.sql` and `schema.sql` files to demonstrate the app's functionality.
+
+To connect to your mySQL app, please enter your own password in the server.js
